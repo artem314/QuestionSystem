@@ -22,7 +22,7 @@ namespace QuestionSystem.Controllers
     "красотка",
     "1-ый"
 }).ToArray();
-
+            
 
             var morphInfo = results[0];
             ViewData["morphInfo"] = morphInfo;
