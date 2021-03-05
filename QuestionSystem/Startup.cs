@@ -54,9 +54,15 @@ namespace QuestionSystem
 
             app.UseMvc(routes =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+            routes.MapRoute(
+                name: "default",
+                template: "{controller=Home}/{action=Index}/{id?}");
+            
+            //routes.MapAreaRoute(
+            //     name: "QuestionArea",
+            //     areaName: "Question",
+            //    template: "question/{controller=Question}/{action=Index}/{id?}");
+               
             });
         }
     }
