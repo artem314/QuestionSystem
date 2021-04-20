@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DeepMorphy;
 using Microsoft.AspNetCore.Mvc;
+using QuestionSystem.Areas.Question.Models;
 
 namespace QuestionSystem.Areas.Question.Controllers.Question
 {
@@ -34,7 +35,7 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             char[] delimiterChars = { ' ', ',', '.', ':', '\t' };
 
             //Инициализация 1 - 4 шаг.
-            Dictionary<int, string> suggestions = splittingText(text);
+            Dictionary<int, GenQuestion> suggestions = splittingText(text);
             //string[] sentences = splittingText(text);
 
             /*
@@ -99,20 +100,20 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
 
             string test = "";
 
-            foreach (KeyValuePair<int, string> sug in suggestions)
+            foreach (KeyValuePair<int, GenQuestion> sug in suggestions)
             {
-                test += sug.Value + " ";
+                test += sug.Value.Suggestion + " ";
             }
 
 
             return Content(test);
         }
 
-        public Dictionary<int, string> splittingText(String text)
+        public Dictionary<int, GenQuestion> splittingText(String text)
         {
             string[] massSuggestions = Regex.Split(text, @"(?<=[\.!\?])\s+");
 
-            Dictionary<int, string> suggestions =  new Dictionary<int, string>();
+            Dictionary<int, GenQuestion> suggestions =  new Dictionary<int, GenQuestion>();
             char[] stopChar = new char[] {'*'};
 
             int index = 0;
@@ -135,7 +136,10 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
                         buf = suggestion.Replace(c.ToString(), "");
                     }
 
-                    suggestions[index] = buf;
+                    GenQuestion q = new GenQuestion();
+                    q.Suggestion = buf;
+
+                    suggestions[index] = q;
                 }
 
 
