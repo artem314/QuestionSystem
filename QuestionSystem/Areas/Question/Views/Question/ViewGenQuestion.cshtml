@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    @using QuestionSystem.Areas.Question.Models;
+</head>
+
+<body>
+
+    @{
+        Dictionary<int, GenQuestion> list = ViewData["GenQuestion"] as Dictionary<int, GenQuestion>;
+    }
+
+    <a asp-action="downloadQuestions">Скачать вопросы</a>
+    <table class="table">
+        <tr><td>id предложения</td><td>Вопрос</td><td></td><td></td></tr>
+        @foreach (KeyValuePair<int, GenQuestion> sug in list)
+        {
+            <tr>
+                <td>@sug.Key</td>
+                <td>@sug.Value.Suggestion</td>
+                <td id="" style="width: 180px;text-align: center">
+                    <a href="#">Изменить</a>
+                </td>
+                <td id="deleteQuestion" style="width: 180px;text-align: center">
+                    <a href="#">Удалить</a>
+                </td>
+            </tr>
+        }
+    </table>
+
+</body>
+
+</html>

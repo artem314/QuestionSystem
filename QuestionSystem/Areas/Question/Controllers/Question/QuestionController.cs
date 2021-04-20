@@ -28,7 +28,7 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             CaseToquestion.Add("тв", "Чем?");
             CaseToquestion.Add("пр", "О чем?");
 
-         //   / question / question
+         //   /question/question
 
             //string text = "Программа для ЭВМ представляет собой описание алгоритма и данных на некотором языке программирования";
             var morph = new MorphAnalyzer();
@@ -104,7 +104,11 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             }
 
 
-            return Content(test);
+            // return Content(test);
+
+            ViewData["GenQuestion"] = suggestions;
+            ViewBag.Title = "Вывод вопросов";
+            return View("ViewGenQuestion");
         }
 
         public Dictionary<int, GenQuestion> splittingText(String text)
@@ -114,7 +118,7 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             Dictionary<int, GenQuestion> suggestions =  new Dictionary<int, GenQuestion>();
             char[] stopChar = new char[] {'*'};
 
-            int index = 0;
+            int index = 1;
             foreach (string suggestion in massSuggestions)
             {
                 bool isNormalSuggestion = true;
