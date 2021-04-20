@@ -36,8 +36,6 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
 
             //Инициализация 1 - 4 шаг.
             Dictionary<int, GenQuestion> suggestions = splittingText(text);
-            //string[] sentences = splittingText(text);
-
             /*
 
             foreach (string sentence in sentences)
@@ -136,8 +134,10 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
                         buf = suggestion.Replace(c.ToString(), "");
                     }
 
-                    GenQuestion q = new GenQuestion();
-                    q.Suggestion = buf;
+                    GenQuestion q = new GenQuestion
+                    {
+                        Suggestion = buf
+                    };
 
                     suggestions[index] = q;
                 }
