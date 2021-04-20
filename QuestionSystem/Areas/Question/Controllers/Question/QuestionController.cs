@@ -17,7 +17,7 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
         }
 
         //[HttpPost]
-        public IActionResult Generate()
+        public IActionResult Generate(string text)
         {
             Dictionary<string, string> CaseToquestion = new Dictionary<string, string>();
             CaseToquestion.Add("им", "Что?"); //на самом деле его быть не должно, но программа не отличит винительный от именительного, а вопросы одинаковые, так что все ок
@@ -27,12 +27,17 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             CaseToquestion.Add("тв", "Чем?");
             CaseToquestion.Add("пр", "О чем?");
 
-            string text = "Программа для ЭВМ представляет собой описание алгоритма и данных на некотором языке программирования";
+         //   / question / question
+
+            //string text = "Программа для ЭВМ представляет собой описание алгоритма и данных на некотором языке программирования";
             var morph = new MorphAnalyzer();
             char[] delimiterChars = { ' ', ',', '.', ':', '\t' };
 
-            //разбиение текста на предложения
-            string[] sentences = Regex.Split(text, @"(?<=[\.!\?])\s+");
+            //Инициализация 1 - 4 шаг.
+            Dictionary<int, string> suggestions = splittingText(text);
+            //string[] sentences = splittingText(text);
+
+            /*
 
             foreach (string sentence in sentences)
             {
@@ -47,6 +52,7 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
                 result.Add("");
                 result.Add("");
                 result.Add("");
+
                 //разбиение предложения на слова
                 string[] words = sentence.Split(delimiterChars);
 
@@ -89,8 +95,56 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
 
             }
 
+            */
 
-            return Content("123");
+            string test = "";
+
+            foreach (KeyValuePair<int, string> sug in suggestions)
+            {
+                test += sug.Value + " ";
+            }
+
+
+            return Content(test);
+        }
+
+        public Dictionary<int, string> splittingText(String text)
+        {
+            string[] massSuggestions = Regex.Split(text, @"(?<=[\.!\?])\s+");
+
+            Dictionary<int, string> suggestions =  new Dictionary<int, string>();
+            char[] stopChar = new char[] {'*'};
+
+            int index = 0;
+            foreach (string suggestion in massSuggestions)
+            {
+                bool isNormalSuggestion = true;
+                string[] words = suggestion.Split(' ');
+
+                if (words.Length <= 3) isNormalSuggestion = false;
+                if(words[words.Length-1].Contains("?")) isNormalSuggestion = false;
+                if(words[words.Length-1].Contains("!")) isNormalSuggestion = false;
+
+
+                if (isNormalSuggestion)
+                {
+                    //Удаление стоп-символов
+                    string buf = "";
+                    foreach (char c in stopChar)
+                    {
+                        buf = suggestion.Replace(c.ToString(), "");
+                    }
+
+                    suggestions[index] = buf;
+                }
+
+
+                index++;
+            }
+
+            return suggestions;
+
+
         }
     }
 }
