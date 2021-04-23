@@ -48,20 +48,20 @@ namespace QuestionSystem
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+           app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
             app.UseMvc(routes =>
             {
-            routes.MapRoute(
-                name: "default",
-                template: "{controller=Home}/{action=Index}/{id?}");
+                //routes.MapRoute(
+                //    name: "default",
+                //    template: "{controller=Home}/{action=Index}/{id?}");
 
                 routes.MapAreaRoute(
                      name: "QuestionArea",
                      areaName: "Question",
-                    template: "question/{controller=Question}/{action=Index}/{id?}");
+                    template: "{controller=Question}/{action=Index}/{id?}");
 
             });
 

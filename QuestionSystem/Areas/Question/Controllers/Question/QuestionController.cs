@@ -9,7 +9,7 @@ using QuestionSystem.Areas.Question.Models;
 
 namespace QuestionSystem.Areas.Question.Controllers.Question
 {
-    [Area("question")]
+    [Area("Question")]
     public class QuestionController : Controller
     {
         public IActionResult Index()
@@ -90,8 +90,6 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
                 }
 
                 var res = result.ToString();
-
-
             }
 
             */
