@@ -259,3 +259,7 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+QuestionSystem/QuestionSystem.csproj
+QuestionSystem.sln
+QuestionSystem/QuestionSystem.csproj
+QuestionSystem.sln

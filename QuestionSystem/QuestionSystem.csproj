@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -51,5 +52,7 @@
       <Pack>$(IncludeRazorContentInPack)</Pack>
     </Content>
   </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties Properties_4launchSettings_1json__JSONSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>
