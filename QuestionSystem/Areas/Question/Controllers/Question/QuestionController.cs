@@ -17,21 +17,39 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             return View("Index");
         }
 
+        ///TODO вынести весь этот дегенаративный бред в отдельный класс
 
         ///TODO вынести в какой нибудь отдельный класс
-        private static Dictionary<string, string> CaseToquestion = new Dictionary<string, string>();
+        private static Dictionary<string, string> CaseToquestion = new Dictionary<string, string>()
+        {
+            { "им", "Что" },//на самом деле его быть не должно, но программа не отличит винительный от именительного, а вопросы одинаковые, так что все ок
+            { "рд", "Чего"},
+            { "дт", "Чему"},
+            { "вн", "Что" },
+            { "тв", "Чем"},
+            { "пр", "О чем" }
+        };
+
+        private static string[] subordinatingConjunctions =
+        { "потому что", "оттого что","так как", "в виду того что", "благодаря тому что","вследствие того что", "в связи с тем что",
+            "чтобы", "для того чтобы", "с тем чтобы","несмотря на то что"
+        };
+
         private static char[] delimiterChars = { ' ', ',', '.', ':', '\t' };
 
-
         /// <summary>
-        /// Генерирует вопрос
+        /// вовзращает вопрос к ПРОСТОМУ предложению, 
+        /// так как сложные предложения состоят из набора простых, 
+        /// то необходимо вызвать несколько раз эту функцию для сложного предоженя
         /// </summary>
-        /// <param name="morph">Обьект MorphAnalyzer</param>
-        /// <param name="sourceSentence">Исходное предложение</param>
-        /// <returns>вопрос</returns>
-        /// TODO вынести MorphAnalyzer в singleton
-        private string generateQuestion(MorphAnalyzer morph, string sourceSentence)
+        /// <param name="morph"></param>
+        /// <param name="words"></param>
+        /// <returns>string Вопрос к ПРОСТОМУ предложению</returns>
+        private List<string> processSimpleSentence(MorphAnalyzer morph, string[] words)
         {
+
+            var morphResult = morph.Parse(words).ToArray();
+            string wordCase = string.Empty;
 
             short subject = 0; // подлежащее
             short predicate = 0;// сказуемое
@@ -44,11 +62,62 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             result.Add("");
             result.Add("");
 
+            int wordIndex = 0;
+            foreach (DeepMorphy.Model.MorphInfo morphInfo in morphResult)
+            {
+
+                if (morphInfo.BestTag.Has("сущ"))
+                {
+                    //первое существительное - подлежащее
+                    if (subject == 0)
+                    {
+                        subject++;
+                        //проверка на словосочетание
+                        ///TODO сделать проверку на выход за границы, но в теории она не нужна.
+                        if (morphResult[wordIndex + 1].BestTag.Has("сущ"))
+                        {
+                            result[2] = morphInfo.Text + " " + morphResult[wordIndex + 1].Text;
+                        }
+                        else
+                        {
+                            result[2] = morphInfo.Text;
+                        }
+                    }
+
+                    //следующее после глагола существительное
+                    if (subject == 1 && predicate != 0 && !String.IsNullOrEmpty(wordCase))
+                    {
+                        wordCase = morphInfo.BestTag["падеж"];
+                        result[0] = CaseToquestion[wordCase];
+                    }
+
+                }
+
+                if (morphInfo.BestTag.Has("гл") && predicate < 1)
+                {
+                    result[1] = morphInfo.Text;
+                    predicate++;
+                }
+
+                wordIndex++;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        ///НЕОЖИДАННО Генерирует вопрос  к конкретному предложению
+        /// </summary>
+        /// <param name="morph">Обьект MorphAnalyzer</param>
+        /// <param name="sourceSentence">Исходное предложение</param>
+        /// <returns>string вопрос</returns>
+
+        /// TODO вынести MorphAnalyzer в singleton
+        private string generateQuestion(MorphAnalyzer morph, string sourceSentence)
+        {
+
             //разбиение предложения на слова
             string[] words = sourceSentence.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);
-
-            var morphResult = morph.Parse(words).ToArray();
-            string wordCase = string.Empty;
 
             int dash = Array.FindIndex(words, d => d.Equals("-"));
 
@@ -61,33 +130,11 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
                 return res;
             }
 
-            foreach (DeepMorphy.Model.MorphInfo morphInfo in morphResult)
-            {
+            List<string> result = processSimpleSentence(morph, words);
 
-                if (morphInfo.BestTag.Has("сущ"))
-                {
+            //string[] words1 = sourceSentence.Split(subordinatingConjunctions, StringSplitOptions.RemoveEmptyEntries);//разбиение по подчинительным союзам
 
-                    if (subject == 0)
-                    {
-                        wordCase = morphInfo.BestTag["падеж"];
-                        subject++;
-                        result[2] = morphInfo.Text;
-                    }
-
-                    //следующее после глагола существительное
-                    if (subject == 1 && predicate != 0 && !String.IsNullOrEmpty(wordCase))
-                    {
-                        result[0] = CaseToquestion[wordCase];
-                    }
-
-                }
-
-                if (morphInfo.BestTag.Has("гл") && predicate < 1)
-                {
-                    result[1] = morphInfo.Text;
-                    predicate++;
-                }
-            }
+            //TODO разбиение по сочинительным союзом и работа с каждой частью, как с не зависимым предложением
 
             foreach (string word in result)
             {
@@ -104,18 +151,14 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
         [HttpPost]
         public IActionResult Generate(string text)
         {
-            CaseToquestion.Add("им", "Что"); //на самом деле его быть не должно, но программа не отличит винительный от именительного, а вопросы одинаковые, так что все ок
-            CaseToquestion.Add("рд", "Чего");
-            CaseToquestion.Add("дт", "Чему");
-            CaseToquestion.Add("вн", "Что");
-            CaseToquestion.Add("тв", "Чем");
-            CaseToquestion.Add("пр", "О чем");
+            //CaseToquestion.Add("им", "Что"); //на самом деле его быть не должно, но программа не отличит винительный от именительного, а вопросы одинаковые, так что все ок
+            //CaseToquestion.Add("рд", "Чего");
+            //CaseToquestion.Add("дт", "Чему");
+            //CaseToquestion.Add("вн", "Что");
+            //CaseToquestion.Add("тв", "Чем");
+            //CaseToquestion.Add("пр", "О чем");
 
-            //   /question/question
-
-            //string text = "Программа для ЭВМ представляет собой описание алгоритма и данных на некотором языке программирования";
             var morph = new MorphAnalyzer();
-
 
             //Инициализация 1 - 4 шаг.
             Dictionary<int, GenQuestion> suggestions = splittingText(text);
@@ -137,6 +180,7 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             return View("ViewGenQuestion");
         }
 
+        //TODO исправить неточность при разбитии на предложения, когда после точки нет пробела - считает как одно предложение
         public Dictionary<int, GenQuestion> splittingText(String text)
         {
             string[] massSuggestions = Regex.Split(text, @"(?<=[\.!\?])\s+");
