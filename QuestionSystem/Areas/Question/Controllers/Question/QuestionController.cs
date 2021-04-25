@@ -35,6 +35,8 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             "чтобы", "для того чтобы", "с тем чтобы","несмотря на то что"
         };
 
+        private static string[] coordinateConjunction = { "а", "но", "однако", "а то", "не то", "а не то", "либо" };
+
         private static char[] delimiterChars = { ' ', ',', '.', ':', '\t' };
 
         /// <summary>
@@ -45,8 +47,23 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
         /// <param name="morph"></param>
         /// <param name="words"></param>
         /// <returns>string Вопрос к ПРОСТОМУ предложению</returns>
-        private List<string> processSimpleSentence(MorphAnalyzer morph, string[] words)
+        private string processSimpleSentence(MorphAnalyzer morph, string sourceSentence)
         {
+
+            //разбиение предложения на слова
+            string[] words = sourceSentence.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);
+
+            int dash = Array.FindIndex(words, d => d.Equals("-"));
+
+            // > 0 чтобы не первой позицией
+            // пусть пока будет по самому факту наличия тире, потом надо добавить еще проверки, на частицы и формы слов
+            if (dash > 0 && (dash + 1 <= words.Length - 1))
+            {
+                //string res = string.Join(" ", words, 0, dash) +" " + string.Join(" ", words, dash + 1, words.Length - 1 - dash);//это ответ
+                ///TODO Вынести "Что такое" в языковые константы
+                string res = "Что такое " + string.Join(" ", words, 0, dash) + " ?";
+                return res;
+            }
 
             var morphResult = morph.Parse(words).ToArray();
             string wordCase = string.Empty;
@@ -85,7 +102,7 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
                     }
 
                     //следующее после глагола существительное
-                    if (subject == 1 && predicate != 0 && !String.IsNullOrEmpty(wordCase))
+                    if (subject == 1 && predicate != 0 && String.IsNullOrEmpty(wordCase))
                     {
                         wordCase = morphInfo.BestTag["падеж"];
                         result[0] = CaseToquestion[wordCase];
@@ -102,7 +119,40 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
                 wordIndex++;
             }
 
-            return result;
+            foreach (string word in result)
+            {
+                if (word == "")
+                {
+                    return string.Empty;
+                }
+            }
+
+            return string.Join(" ", result) + '?';
+        }
+
+
+        /// <summary>
+        /// Подготавливает сложносочиненное предложение к разделению, заменяет сочинительные союзы на тег [REMOVE], дальше по этому тегу идет разбиение на части 
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        private string prepareSentenceForCoordinateConjunction(string source)
+        {
+            string[] words = source.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);
+
+            int wordIndex = 0;
+            foreach (string word in words)
+            {
+                int index = Array.FindIndex(words, d => d.Equals(Array.Find(coordinateConjunction, x => x.Equals(words[wordIndex]))));
+
+                if (wordIndex == index)
+                {
+                    words[index] = "[REMOVE]";
+                }
+                wordIndex++;
+            }
+
+            return string.Join(" ", words);
         }
 
         /// <summary>
@@ -116,36 +166,36 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
         private string generateQuestion(MorphAnalyzer morph, string sourceSentence)
         {
 
-            //разбиение предложения на слова
-            string[] words = sourceSentence.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);
-
-            int dash = Array.FindIndex(words, d => d.Equals("-"));
-
-            // > 0 чтобы не первой позицией
-            if (dash > 0)
-            {
-                //string res = string.Join(" ", words, 0, dash) +" " + string.Join(" ", words, dash + 1, words.Length - 1 - dash);//это ответ
-                ///TODO Вынести "Что такое" в языковые константы
-                string res = "Что такое " + string.Join(" ", words, 0, dash) + " ?";
-                return res;
-            }
-
-            List<string> result = processSimpleSentence(morph, words);
-
             //string[] words1 = sourceSentence.Split(subordinatingConjunctions, StringSplitOptions.RemoveEmptyEntries);//разбиение по подчинительным союзам
 
-            //TODO разбиение по сочинительным союзом и работа с каждой частью, как с не зависимым предложением
+            //разбиение по сочинительным союзам и работа с каждой частью, как с независимым предложением
 
-            foreach (string word in result)
+            string coordinateSentence = prepareSentenceForCoordinateConjunction(sourceSentence);
+            if (coordinateSentence.Contains("[REMOVE]"))
             {
-                if (word == "")
+                string[] coordinateSentences = coordinateSentence.Split("[REMOVE]", StringSplitOptions.RemoveEmptyEntries);
+
+                if (coordinateSentences.Length >= 2)
                 {
-                    return string.Empty;
+                    string result = string.Empty;//пока что несколько вопросов к одному предложению будут возвращаться как одна строка
+
+                    foreach (string coordSentence in coordinateSentences)
+                    {
+                        result += processSimpleSentence(morph, coordSentence);
+                    }
+
+                    if (result.Length != 0)
+                    {
+                        return result;
+                    }
+                    else
+                    {
+                        return "";
+                    }
                 }
             }
 
-            return string.Join(" ", result) + '?';
-
+            return processSimpleSentence(morph, sourceSentence);
         }
 
         [HttpPost]
