@@ -230,7 +230,6 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             return View("ViewGenQuestion");
         }
 
-        //TODO исправить неточность при разбитии на предложения, когда после точки нет пробела - считает как одно предложение
         public Dictionary<int, GenQuestion> splittingText(String text)
         {
             string[] massSuggestions = Regex.Split(text, @"(?<=[\.!\?])\s+");
