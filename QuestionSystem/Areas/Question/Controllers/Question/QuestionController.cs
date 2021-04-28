@@ -49,7 +49,6 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
         /// <returns>string Вопрос к ПРОСТОМУ предложению</returns>
         private string processSimpleSentence(MorphAnalyzer morph, string sourceSentence)
         {
-
             //разбиение предложения на слова
             string[] words = sourceSentence.Split(delimiterChars, StringSplitOptions.RemoveEmptyEntries);
 
@@ -73,7 +72,7 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
                                 /// 0 -  вопросительное слово
                                 /// 1 - глагол
                                 /// 2 - существительное
-                                /// 
+                                
             List<string> result = new List<string>(3);
             result.Add("");
             result.Add("");
@@ -129,7 +128,6 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
 
             return string.Join(" ", result) + '?';
         }
-
 
         /// <summary>
         /// Подготавливает сложносочиненное предложение к разделению, заменяет сочинительные союзы на тег [REMOVE], дальше по этому тегу идет разбиение на части 
@@ -222,9 +220,6 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
                 }
             }
 
-
-            // return Content(test);
-
             ViewData["GenQuestion"] = suggestions;
             ViewBag.Title = "Вывод вопросов";
             return View("ViewGenQuestion");
@@ -235,7 +230,7 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             string[] massSuggestions = Regex.Split(text, @"(?<=[\.!\?])\s+");
 
             Dictionary<int, GenQuestion> suggestions = new Dictionary<int, GenQuestion>();
-            char[] stopChar = new char[] { '*' };
+            char[] stopChar = new char[] { '*', '\n','\r' };
 
             int index = 1;
             foreach (string suggestion in massSuggestions)
@@ -246,7 +241,6 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
                 if (words.Length <= 3) isNormalSuggestion = false;
                 if (words[words.Length - 1].Contains("?")) isNormalSuggestion = false;
                 if (words[words.Length - 1].Contains("!")) isNormalSuggestion = false;
-
 
                 if (isNormalSuggestion)
                 {
@@ -265,12 +259,10 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
                     suggestions[index] = q;
                 }
 
-
                 index++;
             }
 
             return suggestions;
-
 
         }
     }
