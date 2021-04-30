@@ -19,6 +19,8 @@
         <tr><td>id предложения</td><td>Вопрос</td><td></td><td></td></tr>
         @foreach (KeyValuePair<int, GenQuestion> sug in list)
         {
+            @if (sug.Value.QuestionText.Length > 0)
+            {
             <tr>
                 <td>@sug.Key</td>
                 <td>@sug.Value.QuestionText</td>
@@ -29,7 +31,8 @@
                     <a href="#">Удалить</a>
                 </td>
             </tr>
-        }
+                }
+            }
     </table>
 
 </body>

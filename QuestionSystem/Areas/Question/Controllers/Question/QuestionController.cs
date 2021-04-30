@@ -230,7 +230,7 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             string[] massSuggestions = Regex.Split(text, @"(?<=[\.!\?])\s+");
 
             Dictionary<int, GenQuestion> suggestions = new Dictionary<int, GenQuestion>();
-            char[] stopChar = new char[] { '*', '\n','\r' };
+            char[] stopChar = new char[] { '*', '\r','\n' };
 
             int index = 1;
             foreach (string suggestion in massSuggestions)
