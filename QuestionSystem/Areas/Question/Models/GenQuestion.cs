@@ -7,7 +7,7 @@ namespace QuestionSystem.Areas.Question.Models
 {
     public class GenQuestion
     {
-        public string Suggestion { get; set; }
+        public string Sentence { get; set; }
         public string QuestionText { get; set; }
     }
 }

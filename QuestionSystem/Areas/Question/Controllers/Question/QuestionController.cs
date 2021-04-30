@@ -15,7 +15,7 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
         public IActionResult Index()
         {
             return View("Index");
-        }
+        } 
 
         ///TODO вынести весь этот дегенаративный бред в отдельный класс
 
@@ -209,18 +209,18 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             var morph = new MorphAnalyzer();
 
             //Инициализация 1 - 4 шаг.
-            Dictionary<int, GenQuestion> suggestions = splittingText(text);
+            Dictionary<int, GenQuestion> offers = splittingText(text);
 
-            foreach (KeyValuePair<int, GenQuestion> sug in suggestions)
+            foreach (KeyValuePair<int, GenQuestion> sug in offers)
             {
-                string question = generateQuestion(morph, sug.Value.Suggestion);
+                string question = generateQuestion(morph, sug.Value.Sentence);
                 if (question.Length != 0)
                 {
                     sug.Value.QuestionText = question;
                 }
             }
 
-            ViewData["GenQuestion"] = suggestions;
+            ViewData["GenQuestion"] = offers;
             ViewBag.Title = "Вывод вопросов";
             return View("ViewGenQuestion");
         }
@@ -229,20 +229,20 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
         {
             string[] massSuggestions = Regex.Split(text, @"(?<=[\.!\?])\s+");
 
-            Dictionary<int, GenQuestion> suggestions = new Dictionary<int, GenQuestion>();
+            Dictionary<int, GenQuestion> offers = new Dictionary<int, GenQuestion>();
             char[] stopChar = new char[] { '*', '\r','\n' };
 
             int index = 1;
             foreach (string suggestion in massSuggestions)
             {
-                bool isNormalSuggestion = true;
+                bool isNormalSentence = true;
                 string[] words = suggestion.Split(' ');
 
-                if (words.Length <= 3) isNormalSuggestion = false;
-                if (words[words.Length - 1].Contains("?")) isNormalSuggestion = false;
-                if (words[words.Length - 1].Contains("!")) isNormalSuggestion = false;
+                if (words.Length <= 3) isNormalSentence = false;
+                if (words[words.Length - 1].Contains("?")) isNormalSentence = false;
+                if (words[words.Length - 1].Contains("!")) isNormalSentence = false;
 
-                if (isNormalSuggestion)
+                if (isNormalSentence)
                 {
                     //Удаление стоп-символов
                     string buf = "";
@@ -253,16 +253,16 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
 
                     GenQuestion q = new GenQuestion
                     {
-                        Suggestion = buf
+                        Sentence = buf
                     };
 
-                    suggestions[index] = q;
+                    offers[index] = q;
                 }
 
                 index++;
             }
 
-            return suggestions;
+            return offers;
 
         }
     }
