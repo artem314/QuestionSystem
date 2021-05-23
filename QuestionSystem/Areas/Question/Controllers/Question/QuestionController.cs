@@ -153,18 +153,19 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             return string.Join(" ", words);
         }
 
+
+        private static string[] questionsForSubordinate = {"Почему", "По какой причине"};
+
         /// <summary>
         ///НЕОЖИДАННО Генерирует вопрос  к конкретному предложению
         /// </summary>
         /// <param name="morph">Обьект MorphAnalyzer</param>
         /// <param name="sourceSentence">Исходное предложение</param>
         /// <returns>string вопрос</returns>
-
+   
         /// TODO вынести MorphAnalyzer в singleton
         private string generateQuestion(MorphAnalyzer morph, string sourceSentence)
         {
-
-            //string[] words1 = sourceSentence.Split(subordinatingConjunctions, StringSplitOptions.RemoveEmptyEntries);//разбиение по подчинительным союзам
 
             //разбиение по сочинительным союзам и работа с каждой частью, как с независимым предложением
 
@@ -191,6 +192,19 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
                         return "";
                     }
                 }
+            }
+
+            string[] words1 = sourceSentence.Split(subordinatingConjunctions, StringSplitOptions.RemoveEmptyEntries);//разбиение по подчинительным союзам
+
+            if (words1.Length >= 2)
+            {
+                string result = string.Empty;
+                Random rnd = new Random();
+                int index = rnd.Next(0, questionsForSubordinate.Length - 1);
+
+                result = questionsForSubordinate[index] + " " + words1[0] + "?";
+                return result;
+
             }
 
             return processSimpleSentence(morph, sourceSentence);
