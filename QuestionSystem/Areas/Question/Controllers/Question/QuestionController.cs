@@ -17,8 +17,6 @@ namespace QuestionSystem.Areas.Question.Controllers.Question
             return View("Index");
         } 
 
-        ///TODO вынести весь этот дегенаративный бред в отдельный класс
-
         ///TODO вынести в какой нибудь отдельный класс
         private static Dictionary<string, string> CaseToquestion = new Dictionary<string, string>()
         {
